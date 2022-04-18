@@ -64,13 +64,15 @@ const usuariosDelete = async ( req, res = response) => {
     const { id } = req.params
     // Forma correcta, eliminacion logica
     const usuario = await Usuario.findByIdAndUpdate(id, { estado: false})
+    const usuarioAutenticado = req.usuario
 
     // Forma incorrecta peligrosa, eliminacion fisica
     // const usuario = await Usuario.findByIdAndDelete(id)
 
     res.json({
         message: 'Usuario eliminado de la base de datos',
-        id
+        usuario,
+        usuarioAutenticado
     })
 }
 

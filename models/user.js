@@ -36,8 +36,9 @@ const UsuarioSchema = Schema({
 
 // Redifinicion del metodo toJson del esquema para no mostrar ni el id, ni la password ni el campo molesto de __v
 UsuarioSchema.methods.toJSON = function () {
-    const { _id, password, __v, ...resto } = this.toObject()
-    return resto
+    const { _id, password, __v, ...usuario } = this.toObject()
+    usuario.uid = _id
+    return usuario
 }
 
 

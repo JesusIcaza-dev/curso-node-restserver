@@ -13,6 +13,7 @@ class Server {
         // inicializar la app express
         this.app = express()
         this.apiPathUser = '/api/usuarios'
+        this.apiPathAuth = '/api/auth'
         this.port = process.env.PORT
 
         // conectar a la base de datos
@@ -47,6 +48,7 @@ class Server {
 
     routes() {
         this.app.use(this.apiPathUser, require('../routes/user'))
+        this.app.use(this.apiPathAuth, require('../routes/auth'))
     }
 
 
