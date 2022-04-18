@@ -2,9 +2,24 @@ const {response} = require('express')
 const bcrypt = require('bcryptjs')
 const Usuario = require('../models/user')
 
-const usuariosGet = ( req, res = response) => {
+const usuariosGet = async ( req, res = response) => {
+    // los valores devueltos de la query url son strings importante a tener en cuenta si queremos castear
+    const { limite = 5, desde = 0 } = req.query
+    const query = { estado: true}
+    
+    // con Promise.all podemos mandar un array de promesas para que se ejecuten simultaneamente
+    const [usuarios, total] = await Promise.all([ // importante tener el await aqui ya que si no mandaria antes la response de que esto se resuelva
+        Usuario.find(query) // para poner un filtro como si fuera el where en sql
+                    .skip(parseInt(desde)) // posicion del registro a empezar a devolver
+                    .limit(parseInt(limite)) // limite de registros devueltos
+        ,
+        Usuario.countDocuments(query) // para contar la cantidad de registros totales devueltos
+
+    ])
+
     res.json({
-        saludo: 'Api Get Controlador'
+        total,
+        usuarios
     })
 }
 
@@ -27,7 +42,7 @@ const usuariosPost = async ( req, res = response) => {
 }
 
 
-const usuariosPut = ( req, res = response) => {
+const usuariosPut = async ( req, res = response) => {
     // recoger los valores que se pasen por parametros url
     const { id } = req.params
     const { password, google, ...resto } = req.body
@@ -40,14 +55,22 @@ const usuariosPut = ( req, res = response) => {
     const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true})
 
     res.json({
-        saludo: 'Api Put Controlador'
+        usuario
     })
 }
 
 
-const usuariosDelete = ( req, res = response) => {
+const usuariosDelete = async ( req, res = response) => {
+    const { id } = req.params
+    // Forma correcta, eliminacion logica
+    const usuario = await Usuario.findByIdAndUpdate(id, { estado: false})
+
+    // Forma incorrecta peligrosa, eliminacion fisica
+    // const usuario = await Usuario.findByIdAndDelete(id)
+
     res.json({
-        saludo: 'Api Delete Controlador'
+        message: 'Usuario eliminado de la base de datos',
+        id
     })
 }
 

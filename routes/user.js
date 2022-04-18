@@ -4,7 +4,7 @@ const router = Router()
 const { usuariosGet , usuariosPost,
         usuariosPut, usuariosDelete} = require('../controller/user')
 const { validarCampos } = require('../middlewares/validar-campos')
-const { esRolValido, existeEmail } = require('../helpers/db-validator')
+const { esRolValido, existeEmail, existeUsuarioPorId } = require('../helpers/db-validator')
 
 
 
@@ -22,9 +22,18 @@ router.post('/', [
 ], usuariosPost)
 
 // para indicar que esta ruta va a tener que pasarse un id como parametro en la url
-router.put('/:id', usuariosPut)
+router.put('/:id',[
+    check('id', 'No es un id valido').isMongoId(),
+    check('id', existeUsuarioPorId),
+    check('rol').custom( esRolValido ),
+    validarCampos
+] ,usuariosPut)
 
-router.delete('/', usuariosDelete)
+router.delete('/:id', [
+    check('id', 'No es un id valido').isMongoId(),
+    check('id').custom(existeUsuarioPorId),
+    validarCampos
+],usuariosDelete)
 
 
 module.exports = router

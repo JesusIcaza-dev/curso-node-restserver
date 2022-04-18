@@ -33,12 +33,13 @@ const UsuarioSchema = Schema({
     }
 })
 
-// metodos personalizados en base a nuestro esquema
-UsuarioSchema.methods.toJson = function() {
-    // se desestructura para separa el campo de version y password del resto
-    // de campos que si queremos ver en la response
-    const {__v, password, ...usuario} = this.toObject()
-    return usuario
+
+// Redifinicion del metodo toJson del esquema para no mostrar ni el id, ni la password ni el campo molesto de __v
+UsuarioSchema.methods.toJSON = function () {
+    const { _id, password, __v, ...resto } = this.toObject()
+    return resto
 }
+
+
 
 module.exports = model( 'Usuario', UsuarioSchema )
