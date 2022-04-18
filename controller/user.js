@@ -1,4 +1,6 @@
 const {response} = require('express')
+const bcrypt = require('bcryptjs')
+const Usuario = require('../models/user')
 
 const usuariosGet = ( req, res = response) => {
     res.json({
@@ -7,18 +9,36 @@ const usuariosGet = ( req, res = response) => {
 }
 
 
-const usuariosPost = ( req, res = response) => {
+const usuariosPost = async ( req, res = response) => {
     // recoger los valores que se pasen por el body
-    const body = req.body
+    const { nombre, correo, password, rol } = req.body
+    // solo recogera los valores que cuadren con el esquema de nuestro modelo
+    const usuario = new Usuario( { nombre, correo, password, rol} )
+    
+    // encriptar la contraseña
+    const salt = bcrypt.genSaltSync(10)
+    usuario.password = bcrypt.hashSync(password, salt)
+    
+    // para guardar un registro en la base de datos
+    await usuario.save()
     res.json({
-        body
+        usuario
     })
 }
 
 
 const usuariosPut = ( req, res = response) => {
     // recoger los valores que se pasen por parametros url
-    const params = req.params
+    const { id } = req.params
+    const { password, google, ...resto } = req.body
+    // TODO validar contra base de datos
+    if ( password ) {
+        // encriptar la contraseña
+        const salt = bcrypt.genSaltSync(10)
+        resto.password = bcrypt.hashSync( password, salt )
+    }
+    const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true})
+
     res.json({
         saludo: 'Api Put Controlador'
     })
